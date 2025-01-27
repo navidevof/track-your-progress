@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-custom-black-1: #000000; /* Black */
+  --color-custom-black-2: #0a0a0a; /* Dark Background */
+  --color-custom-black-3: #1f1f1f; /* Dark Background Hover */
+  --color-custom-gray-1: #333333; /* Light Gray Background */
+  --color-custom-gray-2: #444444; /* Hover Gray */
+  --color-custom-gray-3: #666666; /* Placeholder Gray */
+  --color-custom-gray-4: #888888; /* Border Gray */
+  --color-custom-white-1: #ffffff; /* White */
+  --color-custom-accent-1: #0070f3; /* Primary Blue */
+  --color-custom-accent-2: #3291ff; /* Light Blue */
+  --color-custom-accent-3: #79baff; /* Hover Blue */
+  --color-custom-accent-4: #d8d8d8; /* Neutral Light */
+  --color-custom-error: #ff0000; /* Error Red */
+  --color-custom-success: #007450; /* Success Green */
+}
+
+body {
+  @apply bg-custom-black-1 text-custom-white-1 font-sans;
+}
+
+button {
+  @apply cursor-pointer transition duration-200;
+}
+
+input,
+select {
+  @apply bg-custom-black-2 px-3 py-2 text-custom-white-1 border border-custom-gray-1 transition duration-200 outline-0 hover:border-custom-gray-3 rounded-lg;
+}
