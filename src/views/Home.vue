@@ -6,20 +6,12 @@
     <aside class="w-full flex justify-between items-center">
       <span class="font-medium">
         Dia:
-        <select
-          class="ml-1"
-          v-model="selectedDay"
-          @change="progressStore.findRoutine"
-        >
-          <option
-            :selected="new Date().getDay() === day"
-            :value="day"
-            :key="day"
-            v-for="(_, day) in 6"
-          >
-            {{ formattedDay(day) }}
-          </option>
-        </select>
+        <input
+          type="date"
+          class="ml-1 text-white"
+          v-model="selectedDate"
+          @input="updateSelectedDay"
+        />
       </span>
       <ButtonPrimary type="button" class="ml-2 font-medium">
         Ver historial
@@ -97,7 +89,6 @@ import SectionContainer from "@/components/ui/generals/SectionContainer.vue";
 import type { IExercise } from "@/interfaces/exercise";
 import type { IRoutine, TDay } from "@/interfaces/progress";
 import { useProgressStore } from "@/stores/progress";
-import formattedDay from "@/utils/FormattedDay";
 import formattedUrlSlug from "@/utils/FormattedUrlSlug";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
@@ -106,15 +97,26 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const progressStore = useProgressStore();
 
-const { routine, selectedDay, progress } = storeToRefs(progressStore);
+const { routine, selectedDay, progress, selectedDate } =
+  storeToRefs(progressStore);
 
 const newExerciseName = ref("");
 const showModal = ref(false);
 
 onMounted(() => {
-  selectedDay.value = new Date().getDay() as TDay;
   progressStore.findRoutine();
 });
+
+const updateSelectedDay = (e: Event) => {
+  const dateString = (e.target as HTMLInputElement).value;
+  const [year, month, day] = dateString.split("-").map(Number);
+
+  // Crear fecha en UTC para evitar problemas de timezone
+  const selectedDate = new Date(Date.UTC(year, month - 1, day));
+
+  progressStore.selectedDay = selectedDate.getUTCDay() as TDay;
+  progressStore.findRoutine();
+};
 
 const createExercises = () => {
   if (!newExerciseName.value.trim()) return;

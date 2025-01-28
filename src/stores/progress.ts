@@ -1,12 +1,16 @@
 import { initialProgress } from "@/constants/initialValues";
 import type { IProgress, IRoutine, TDay } from "@/interfaces/progress";
+import { getLocalISODate } from "@/utils/GetLocalDate";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
 export const useProgressStore = defineStore(
   "progress",
   () => {
-    const selectedDay = ref<TDay>(new Date().getDay() as TDay);
+    const selectedDate = ref(getLocalISODate(new Date()));
+    const selectedDay = ref<TDay>(
+      new Date(selectedDate.value).getDay() as TDay
+    );
     const progress = ref<IProgress>(structuredClone(initialProgress));
     const lastRoutine = ref<IRoutine>();
     const routine = ref<IRoutine>();
@@ -75,6 +79,43 @@ export const useProgressStore = defineStore(
       routine.value = newRoutine;
     };
 
+    // Encuentra el último registro de un ejercicio específico (excluyendo el día actual).
+    const findLastExerciseRecord = (exerciseId: string) => {
+      // 1. Obtener todas las rutinas de todos los días
+      const allRoutines = Object.values(progress.value).flat();
+
+      if (allRoutines.length === 0) {
+        return null;
+      }
+
+      // 2. Fecha actual para comparación
+      const todayDateString = new Date().toDateString();
+
+      // 3. Filtrar y ordenar registros
+      const exerciseRecords = allRoutines
+        .filter((routine) => {
+          const routineDate = new Date(routine.date);
+
+          return (
+            routineDate.toDateString() !== todayDateString &&
+            selectedDate.value !== getLocalISODate(routineDate)
+          ); // Excluir hoy
+        })
+        .flatMap((routine) =>
+          routine.exercises
+            .filter((exercise) => exercise.id === exerciseId)
+            .map((exercise) => ({
+              date: routine.date,
+              exercise,
+            }))
+        )
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        ); // Orden descendente
+
+      return exerciseRecords[0] || null;
+    };
+
     // Computed para verificar si la última rutina cargada es la misma que la actual.
     const isLastRoutineSame = computed(() => {
       return routine.value?.date === lastRoutine.value?.date;
@@ -82,11 +123,13 @@ export const useProgressStore = defineStore(
 
     return {
       selectedDay,
+      selectedDate,
       progress,
       routine,
       lastRoutine,
       isLastRoutineSame,
       findRoutine,
+      findLastExerciseRecord,
     };
   },
   {

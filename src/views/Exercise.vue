@@ -34,7 +34,7 @@
         </button>
       </form>
     </h1>
-    <SectionContainer v-show="!isLastRoutineSame">
+    <SectionContainer v-show="topSet">
       <h2 class="font-semibold text-lg">Top set:</h2>
       <div class="justify-between flex items-center text-sm font-medium">
         <span>
@@ -42,7 +42,7 @@
           {{ topSet?.reps }} Reps
         </span>
         <span>
-          {{ lastRoutine?.date }}
+          {{ topSet?.date }}
         </span>
       </div>
     </SectionContainer>
@@ -109,13 +109,14 @@ import SectionContainer from "@/components/ui/generals/SectionContainer.vue";
 import { initialSeries } from "@/constants/initialValues";
 import type { IExercise } from "@/interfaces/exercise";
 import { useProgressStore } from "@/stores/progress";
+import { getLocalISODate } from "@/utils/GetLocalDate";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 const progressStore = useProgressStore();
-const { routine, lastRoutine, isLastRoutineSame } = storeToRefs(progressStore);
+const { routine } = storeToRefs(progressStore);
 const exercise = ref<IExercise>();
 
 const showEdit = ref<boolean>(false);
@@ -141,19 +142,20 @@ onMounted(() => {
 
 const topSet = computed(() => {
   const exerciseId = route.params.exerciseId as string;
-  if (!lastRoutine.value || !exerciseId) return null;
+  if (!exerciseId) return null;
 
-  const exercise = lastRoutine.value.exercises.find(
-    (exercise) => exercise.id === exerciseId
-  );
+  const routine = progressStore.findLastExerciseRecord(exerciseId);
 
-  const topSet = exercise?.series
+  const topSet = routine?.exercise.series
     .sort((a, b) => b.weight - a.weight)
     .sort((a, b) => {
       return b.reps - a.reps;
     })[0];
 
-  return topSet;
+  return {
+    date: getLocalISODate(new Date(routine?.date || Date.now())),
+    ...topSet,
+  };
 });
 
 const addSerie = () => {
