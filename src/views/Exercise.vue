@@ -67,7 +67,7 @@
             <IconX class="size-4" />
           </button>
         </header>
-        <div class="flex gap-x-3 items-center">
+        <div class="flex gap-x-3 items-center w-full">
           <label class="flex flex-col gap-y-1 w-full">
             <span class="text-sm">Peso</span>
             <input
@@ -75,6 +75,7 @@
               placeholder="Peso"
               min="1"
               type="number"
+              class="w-full"
             />
           </label>
           <label class="flex flex-col gap-y-1 w-full">
@@ -98,6 +99,7 @@
               placeholder="Reps"
               min="1"
               type="number"
+              class="w-full"
             />
           </label>
         </div>
