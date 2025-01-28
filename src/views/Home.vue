@@ -10,11 +10,11 @@
           type="date"
           class="ml-1 text-white"
           v-model="selectedDate"
-          @input="updateSelectedDay"
+          @input="progressStore.findRoutine"
         />
       </span>
       <ButtonPrimary type="button" class="ml-2 font-medium">
-        Ver historial
+        Historial
       </ButtonPrimary>
     </aside>
     <SectionContainer v-show="routine?.exercises?.length">
@@ -87,9 +87,11 @@ import MainContainer from "@/components/ui/generals/MainContainer.vue";
 import ModalContainer from "@/components/ui/generals/ModalContainer.vue";
 import SectionContainer from "@/components/ui/generals/SectionContainer.vue";
 import type { IExercise } from "@/interfaces/exercise";
-import type { IRoutine, TDay } from "@/interfaces/progress";
+import type { IRoutine } from "@/interfaces/progress";
 import { useProgressStore } from "@/stores/progress";
+import { parseDate } from "@/utils/FormattedDate";
 import formattedUrlSlug from "@/utils/FormattedUrlSlug";
+import { getLocalISODate } from "@/utils/GetLocalDate";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -107,17 +109,6 @@ onMounted(() => {
   progressStore.findRoutine();
 });
 
-const updateSelectedDay = (e: Event) => {
-  const dateString = (e.target as HTMLInputElement).value;
-  const [year, month, day] = dateString.split("-").map(Number);
-
-  // Crear fecha en UTC para evitar problemas de timezone
-  const selectedDate = new Date(Date.UTC(year, month - 1, day));
-
-  progressStore.selectedDay = selectedDate.getUTCDay() as TDay;
-  progressStore.findRoutine();
-};
-
 const createExercises = () => {
   if (!newExerciseName.value.trim()) return;
 
@@ -128,9 +119,10 @@ const createExercises = () => {
     createdAt: Date.now(),
   };
 
-  if (!routine.value) {
+  if (!routine.value && selectedDate.value) {
+    const parserSelectedDate = parseDate(selectedDate.value);
     const newRoutine: IRoutine = {
-      date: new Date().toLocaleDateString(),
+      date: getLocalISODate(parserSelectedDate),
       exercises: [newExercise],
     };
     progress.value[selectedDay.value].push(newRoutine);

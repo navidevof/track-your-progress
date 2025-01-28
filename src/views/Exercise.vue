@@ -34,6 +34,12 @@
         </button>
       </form>
     </h1>
+    <SectionContainer class="items-end flex">
+      <label class="flex items-center gap-x-2">
+        Igualar unidad de peso:
+        <input type="checkbox" v-model="isWeightUnitChange" />
+      </label>
+    </SectionContainer>
     <SectionContainer v-show="topSet">
       <h2 class="font-semibold text-lg">Top set:</h2>
       <div class="justify-between flex items-center text-sm font-medium">
@@ -62,26 +68,38 @@
           </button>
         </header>
         <div class="flex gap-x-3 items-center">
-          <input
-            v-model="serie.weight"
-            placeholder="Peso"
-            min="1"
-            type="number"
-            class="w-full"
-          />
-          <select class="w-full" v-model="serie.weightUnit">
-            <option value="kg">Kg</option>
-            <option value="lbs">Lbs</option>
-            <option value="laminas">Laminas</option>
-            <option value="otro">Otro</option>
-          </select>
-          <input
-            v-model="serie.reps"
-            placeholder="Reps"
-            min="1"
-            type="number"
-            class="w-full"
-          />
+          <label class="flex flex-col gap-y-1 w-full">
+            <span class="text-sm">Peso</span>
+            <input
+              v-model="serie.weight"
+              placeholder="Peso"
+              min="1"
+              type="number"
+            />
+          </label>
+          <label class="flex flex-col gap-y-1 w-full">
+            <span class="text-sm">Unidad</span>
+            <select
+              class="w-full disabled:cursor-not-allowed"
+              v-model="serie.weightUnit"
+              :disabled="idx > 0 && isWeightUnitChange"
+              @change="changeWeightUnit"
+            >
+              <option value="kg">Kg</option>
+              <option value="lbs">Lbs</option>
+              <option value="laminas">Laminas</option>
+              <option value="otro">Otro</option>
+            </select>
+          </label>
+          <label class="flex flex-col gap-y-1 w-full">
+            <span class="text-sm">Reps</span>
+            <input
+              v-model="serie.reps"
+              placeholder="Reps"
+              min="1"
+              type="number"
+            />
+          </label>
         </div>
       </aside>
     </SectionContainer>
@@ -109,9 +127,8 @@ import SectionContainer from "@/components/ui/generals/SectionContainer.vue";
 import { initialSeries } from "@/constants/initialValues";
 import type { IExercise } from "@/interfaces/exercise";
 import { useProgressStore } from "@/stores/progress";
-import { getLocalISODate } from "@/utils/GetLocalDate";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
@@ -120,6 +137,7 @@ const { routine } = storeToRefs(progressStore);
 const exercise = ref<IExercise>();
 
 const showEdit = ref<boolean>(false);
+const isWeightUnitChange = ref<boolean>(true);
 
 onMounted(() => {
   progressStore.findRoutine();
@@ -145,6 +163,7 @@ const topSet = computed(() => {
   if (!exerciseId) return null;
 
   const routine = progressStore.findLastExerciseRecord(exerciseId);
+  console.log({ routine });
 
   const topSet = routine?.exercise.series
     .sort((a, b) => b.weight - a.weight)
@@ -152,8 +171,10 @@ const topSet = computed(() => {
       return b.reps - a.reps;
     })[0];
 
+  if (!topSet || topSet?.reps === 0) return null;
+
   return {
-    date: getLocalISODate(new Date(routine?.date || Date.now())),
+    date: routine?.date,
     ...topSet,
   };
 });
@@ -169,4 +190,16 @@ const removeSerie = (index: number) => {
 
   exercise.value.series.splice(index, 1);
 };
+
+const changeWeightUnit = () => {
+  if (!exercise.value || !isWeightUnitChange.value) return;
+
+  const firstSerie = exercise.value.series[0];
+  exercise.value.series = exercise.value.series.map((serie) => ({
+    ...serie,
+    weightUnit: firstSerie.weightUnit,
+  }));
+};
+
+watch(isWeightUnitChange, changeWeightUnit);
 </script>

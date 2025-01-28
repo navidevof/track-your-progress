@@ -1,129 +1,115 @@
 import { initialProgress } from "@/constants/initialValues";
 import type { IProgress, IRoutine, TDay } from "@/interfaces/progress";
+import { parseDate } from "@/utils/FormattedDate";
 import { getLocalISODate } from "@/utils/GetLocalDate";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 export const useProgressStore = defineStore(
   "progress",
   () => {
     const selectedDate = ref(getLocalISODate(new Date()));
-    const selectedDay = ref<TDay>(
-      new Date(selectedDate.value).getDay() as TDay
-    );
+    const selectedDay = ref<TDay>(new Date().getDay() as TDay);
     const progress = ref<IProgress>(structuredClone(initialProgress));
-    const lastRoutine = ref<IRoutine>();
     const routine = ref<IRoutine>();
+    const lastRoutine = ref<IRoutine>();
 
-    // Encuentra la última rutina válida (la más reciente) para el día seleccionado.
-    const findLastRoutine = () => {
-      const routinesForDay = progress.value[selectedDay.value];
-
-      if (!routinesForDay?.length) {
-        lastRoutine.value = undefined;
-        return;
-      }
-
-      const todayDate = new Date().toLocaleDateString();
-      const sortedRoutines = routinesForDay.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    const findLastRoutineForDay = (
+      day: TDay,
+      date: Date,
+      excludeCurrent: boolean = false
+    ): IRoutine | undefined => {
+      const routines = (progress.value[day] || []).filter((r) =>
+        excludeCurrent ? new Date(r.date) < date : new Date(r.date) <= date
       );
 
-      // Si la rutina más reciente es de hoy, asignar la segunda más reciente (si existe).
-      if (sortedRoutines.length > 1 && sortedRoutines[0].date === todayDate) {
-        lastRoutine.value = sortedRoutines[1];
-        return;
-      }
-
-      // Asignar la rutina más reciente.
-      lastRoutine.value = sortedRoutines[0];
+      return routines.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      )[0];
     };
 
-    // Encuentra o crea la rutina para el día seleccionado.
+    const createNewRoutineFromLast = (
+      lastRoutine: IRoutine,
+      date: string
+    ): IRoutine => ({
+      date,
+      exercises: lastRoutine.exercises.map((exercise) => ({
+        ...exercise,
+        series: exercise.series.map((series) => ({
+          id: Date.now() + Math.random(), // Generar un ID único
+          reps: 0,
+          weight: 0,
+          weightUnit: series.weightUnit,
+        })),
+      })),
+    });
+
+    // Función principal para encontrar o crear la rutina
     const findRoutine = () => {
-      findLastRoutine();
+      const targetDate = parseDate(selectedDate.value);
+      const targetISO = getLocalISODate(targetDate);
+      const todayISO = getLocalISODate(new Date());
+      const dayOfWeek = targetDate.getDay() as TDay;
+      const routinesForDay = progress.value[dayOfWeek] || [];
 
-      if (!lastRoutine.value) {
-        routine.value = undefined;
-        return;
+      let targetRoutine = routinesForDay.find((r) => r.date === targetISO);
+
+      if (!targetRoutine) {
+        if (targetISO === todayISO) {
+          const lastRoutineForToday = findLastRoutineForDay(
+            dayOfWeek,
+            new Date(todayISO),
+            true
+          );
+          if (lastRoutineForToday) {
+            targetRoutine = createNewRoutineFromLast(
+              lastRoutineForToday,
+              todayISO
+            );
+            routinesForDay.push(targetRoutine);
+            progress.value[dayOfWeek] = routinesForDay;
+          }
+        } else {
+          targetRoutine = findLastRoutineForDay(dayOfWeek, targetDate);
+        }
       }
 
-      const todayDate = new Date().toLocaleDateString();
-      const routinesForDay = progress.value[selectedDay.value];
-
-      // Si ya existe una rutina para hoy, usarla.
-      const routineFromToday = routinesForDay.find((r) => r.date === todayDate);
-      if (routineFromToday) {
-        routine.value = routineFromToday;
-        return;
-      }
-
-      // Crear una nueva rutina basada en la última rutina.
-      const newRoutine: IRoutine = {
-        date: todayDate,
-        exercises: structuredClone(
-          lastRoutine.value.exercises.map((exercise) => ({
-            ...exercise,
-            series: exercise.series.map(() => ({
-              id: Date.now() + Math.random(),
-              reps: 0,
-              weight: 0,
-              weightUnit: "kg",
-            })),
-          }))
-        ),
-      };
-
-      // Agregar la nueva rutina al progreso del día seleccionado.
-      routinesForDay.push(newRoutine);
-      routine.value = newRoutine;
+      routine.value = targetRoutine;
+      lastRoutine.value = findLastRoutineForDay(dayOfWeek, targetDate, true);
     };
 
-    // Encuentra el último registro de un ejercicio específico (excluyendo el día actual).
     const findLastExerciseRecord = (exerciseId: string) => {
-      // 1. Obtener todas las rutinas de todos los días
       const allRoutines = Object.values(progress.value).flat();
 
-      if (allRoutines.length === 0) {
-        return null;
-      }
-
-      // 2. Fecha actual para comparación
-      const todayDateString = new Date().toDateString();
-
-      // 3. Filtrar y ordenar registros
-      const exerciseRecords = allRoutines
-        .filter((routine) => {
-          const routineDate = new Date(routine.date);
-
-          return (
-            routineDate.toDateString() !== todayDateString &&
-            selectedDate.value !== getLocalISODate(routineDate)
-          ); // Excluir hoy
-        })
-        .flatMap((routine) =>
-          routine.exercises
-            .filter((exercise) => exercise.id === exerciseId)
-            .map((exercise) => ({
-              date: routine.date,
-              exercise,
-            }))
-        )
-        .sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        ); // Orden descendente
-
-      return exerciseRecords[0] || null;
+      return (
+        allRoutines
+          .filter((routine) => routine.date !== selectedDate.value)
+          .flatMap((routine) =>
+            routine.exercises
+              .filter((exercise) => exercise.id === exerciseId)
+              .map((exercise) => ({ date: routine.date, exercise }))
+          )
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )[0] || null
+      );
     };
 
-    // Computed para verificar si la última rutina cargada es la misma que la actual.
-    const isLastRoutineSame = computed(() => {
-      return routine.value?.date === lastRoutine.value?.date;
+    // Computed
+    const isLastRoutineSame = computed(
+      () => routine.value?.date === lastRoutine.value?.date
+    );
+
+    // Reacción a cambios en la fecha seleccionada
+    watch(selectedDate, () => {
+      const targetDate = parseDate(selectedDate.value);
+      selectedDay.value = targetDate.getDay() as TDay;
+      findRoutine();
     });
 
     return {
-      selectedDay,
       selectedDate,
+      selectedDay,
       progress,
       routine,
       lastRoutine,
