@@ -33,15 +33,17 @@ export const useProgressStore = defineStore(
       date: string
     ): IRoutine => ({
       date,
-      exercises: lastRoutine.exercises.map((exercise) => ({
-        ...exercise,
-        series: exercise.series.map((series) => ({
-          id: Date.now() + Math.random(), // Generar un ID único
-          reps: 0,
-          weight: 0,
-          weightUnit: series.weightUnit,
-        })),
-      })),
+      exercises: structuredClone(
+        lastRoutine.exercises.map((exercise) => ({
+          ...exercise,
+          series: exercise.series.map((series) => ({
+            id: Date.now() + Math.random(), // Generar un ID único
+            reps: 0,
+            weight: 0,
+            weightUnit: series.weightUnit,
+          })),
+        }))
+      ),
     });
 
     // Función principal para encontrar o crear la rutina
@@ -61,16 +63,23 @@ export const useProgressStore = defineStore(
             new Date(todayISO),
             true
           );
+
           if (lastRoutineForToday) {
             targetRoutine = createNewRoutineFromLast(
               lastRoutineForToday,
               todayISO
             );
-            routinesForDay.push(targetRoutine);
+            routinesForDay.unshift(targetRoutine);
             progress.value[dayOfWeek] = routinesForDay;
           }
         } else {
           targetRoutine = findLastRoutineForDay(dayOfWeek, targetDate);
+          if (targetRoutine) {
+            targetRoutine = createNewRoutineFromLast(targetRoutine, targetISO);
+            routinesForDay.unshift(targetRoutine);
+          }
+
+          progress.value[dayOfWeek] = routinesForDay;
         }
       }
 

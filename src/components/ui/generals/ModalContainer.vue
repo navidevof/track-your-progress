@@ -3,7 +3,7 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-custom-black-2/50 backdrop-blur-md"
   >
     <aside
-      class="flex flex-col md:w-auto w-5/6 bg-custom-black-2 p-4 rounded-lg border border-custom-gray-1"
+      :class="`${className} flex flex-col md:w-auto w-5/6 max-h-[90vh] bg-custom-black-2 overflow-y-auto p-4 rounded-lg border border-custom-gray-1`"
     >
       <header class="flex justify-end">
         <button
@@ -21,5 +21,10 @@
 <script setup lang="ts">
 import IconX from "@/components/icons/IconX.vue";
 
+interface Props {
+  className?: string;
+}
+
+defineProps<Props>();
 const emit = defineEmits(["close"]);
 </script>

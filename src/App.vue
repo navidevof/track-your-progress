@@ -9,13 +9,9 @@ import { onMounted } from "vue";
 import { getLocalISODate } from "./utils/GetLocalDate";
 
 const progressStore = useProgressStore();
-const { selectedDate, selectedDay } = storeToRefs(progressStore);
+const { selectedDate } = storeToRefs(progressStore);
 
 onMounted(() => {
   selectedDate.value = getLocalISODate(new Date());
-  console.log({
-    selectedDay: selectedDay.value,
-    selectedDate: selectedDate.value,
-  });
 });
 </script>

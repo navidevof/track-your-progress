@@ -3,20 +3,7 @@
     <h1 class="text-xl font-bold text-center md:text-2xl">
       Registra tu progreso
     </h1>
-    <aside class="w-full flex justify-between items-center">
-      <span class="font-medium">
-        Dia:
-        <input
-          type="date"
-          class="ml-1 text-white"
-          v-model="selectedDate"
-          @input="progressStore.findRoutine"
-        />
-      </span>
-      <ButtonPrimary type="button" class="ml-2 font-medium">
-        Historial
-      </ButtonPrimary>
-    </aside>
+    <Header />
     <SectionContainer v-show="routine?.exercises?.length">
       <div
         class="flex items-center gap-x-3 relative"
@@ -80,6 +67,7 @@
 </template>
 
 <script setup lang="ts">
+import Header from "@/components/home/Header.vue";
 import IconTrash from "@/components/icons/IconTrash.vue";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary.vue";
 import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary.vue";
@@ -125,7 +113,7 @@ const createExercises = () => {
       date: getLocalISODate(parserSelectedDate),
       exercises: [newExercise],
     };
-    progress.value[selectedDay.value].push(newRoutine);
+    progress.value[selectedDay.value].unshift(newRoutine);
     routine.value = newRoutine;
 
     newExerciseName.value = "";
