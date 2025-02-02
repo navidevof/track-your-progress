@@ -165,7 +165,6 @@ const topSet = computed(() => {
   if (!exerciseId) return null;
 
   const routine = progressStore.findLastExerciseRecord(exerciseId);
-  console.log({ routine });
 
   const topSet = routine?.exercise.series
     .sort((a, b) => b.weight - a.weight)
