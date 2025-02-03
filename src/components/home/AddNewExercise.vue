@@ -76,7 +76,7 @@ const filteredExercises = computed(() => {
   if (!newExerciseName.value.trim()) return myExercises.value;
 
   return myExercises.value.filter((exercise) =>
-    exercise.name.toLowerCase().includes(newExerciseName.value.toLowerCase())
+    exercise.id.toLowerCase().includes(formattedUrlSlug(newExerciseName.value))
   );
 });
 
