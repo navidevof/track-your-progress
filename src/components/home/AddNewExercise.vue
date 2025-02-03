@@ -31,7 +31,7 @@
 
           <div
             v-show="showAutocomplete && myExercises.length > 0"
-            class="absolute left-0 z-10 top-full mt-2 w-full flex flex-col gap-y-2 max-h-52 items-center gap-x-2 bg-custom-gray-1 rounded-lg px-4 py-2"
+            class="absolute left-0 z-10 top-full mt-2 w-full flex flex-col gap-y-2 overflow-y-auto max-h-52 items-center gap-x-2 bg-custom-gray-1 rounded-lg px-4 py-2"
           >
             <button
               @mousedown.prevent="setNewExerciseName(exercise.name)"
