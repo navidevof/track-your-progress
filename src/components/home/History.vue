@@ -16,7 +16,7 @@
       <h2 class="text-center font-semibold text-lg">Historial</h2>
       <template v-if="showSelectDayData">
         <button
-          class="font-medium text-start flex items-center gap-x-1"
+          class="font-medium text-start flex items-center justify-start gap-x-1 w-full transition duration-200 hover:text-custom-gray-4"
           @click="showSelectDayData = false"
         >
           <IconChevron class="size-4 mt-0.5" />
@@ -28,7 +28,7 @@
             v-for="routine in progress[localSelectedDay]"
           >
             <button
-              class="justify-between flex items-center px-4 mb-1"
+              class="justify-between flex items-center px-4 mb-1 transition duration-200 hover:text-custom-gray-4"
               @click="toggleRoutine(routine.date)"
             >
               <span class="text-end text-sm font-medium">
@@ -40,7 +40,7 @@
               />
             </button>
             <button
-              class="flex flex-col gap-y-1 bg-custom-gray-1 py-3 px-4 rounded-lg"
+              class="flex flex-col gap-y-1 bg-custom-gray-1 py-3 px-4 rounded-lg transition duration-200 border border-custom-gray-1 hover:border-custom-gray-4"
               v-for="exercise in routine.exercises"
               :key="exercise.id"
               @click="goToExercise(routine.date, exercise.id)"
