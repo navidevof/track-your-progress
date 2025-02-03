@@ -19,7 +19,7 @@
           class="font-medium text-start flex items-center gap-x-1"
           @click="showSelectDayData = false"
         >
-          <IconChevron class="size-4 mt-px" />
+          <IconChevron class="size-4 mt-0.5" />
           {{ formattedDay(localSelectedDay) }}
         </button>
         <div class="flex flex-col gap-y-3">
@@ -27,14 +27,24 @@
             class="flex flex-col gap-y-2"
             v-for="routine in progress[localSelectedDay]"
           >
-            <span class="text-end w-full text-sm font-medium">
-              {{ routine.date }}
-            </span>
+            <button
+              class="justify-between flex items-center px-4 mb-1"
+              @click="toggleRoutine(routine.date)"
+            >
+              <span class="text-end text-sm font-medium">
+                {{ routine.date }}
+              </span>
+              <IconChevron
+                class="size-4 mt-px rotate-180 transition-transform duration-200"
+                :class="[isExpanded(routine.date) && 'rotate-[270deg]']"
+              />
+            </button>
             <button
               class="flex flex-col gap-y-1 bg-custom-gray-1 py-3 px-4 rounded-lg"
               v-for="exercise in routine.exercises"
               :key="exercise.id"
               @click="goToExercise(routine.date, exercise.id)"
+              v-show="isExpanded(routine.date)"
             >
               <span class="font-medium">{{ exercise.name }}</span>
               <div class="w-full h-px bg-custom-gray-4" />
@@ -61,7 +71,6 @@
               </span>
             </button>
           </div>
-
           <span
             class="text-center text-sm text-pretty"
             v-show="!progress[localSelectedDay].length"
@@ -103,6 +112,7 @@ const router = useRouter();
 
 const progressStore = useProgressStore();
 const { progress, selectedDate, selectedDay } = storeToRefs(progressStore);
+const expandedRoutines = ref<{ [key: string]: boolean }>({});
 
 const selectDay = (day: number) => {
   localSelectedDay.value = day as TDay;
@@ -119,5 +129,14 @@ const goToExercise = (date: string, exerciseId: string) => {
   selectedDate.value = date;
   selectedDay.value = localSelectedDay.value;
   router.push(`/ejercicio/${exerciseId}`);
+};
+
+const toggleRoutine = (routineDate: string) => {
+  expandedRoutines.value[routineDate] = !expandedRoutines.value[routineDate];
+};
+
+// Función para verificar si un ejercicio está expandido
+const isExpanded = (routineDate: string): boolean => {
+  return !!expandedRoutines.value[routineDate];
 };
 </script>
