@@ -5,6 +5,11 @@ export interface ISerie {
   weightUnit: string;
 }
 
+export interface IMyExercise {
+  id: string;
+  name: string;
+}
+
 export interface IExercise {
   id: string;
   name: string;
