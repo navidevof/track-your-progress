@@ -30,13 +30,13 @@
           />
 
           <div
-            v-show="showAutocomplete && myExercises.length > 0"
+            v-show="showAutocomplete && filteredExercises.length > 0"
             class="absolute left-0 z-10 top-full mt-2 w-full flex flex-col gap-y-2 overflow-y-auto max-h-52 items-center gap-x-2 bg-custom-gray-1 rounded-lg px-4 py-2"
           >
             <button
               @mousedown.prevent="setNewExerciseName(exercise.name)"
               @touchstart.prevent="setNewExerciseName(exercise.name)"
-              v-for="exercise in myExercises"
+              v-for="exercise in filteredExercises"
               class="w-full text-start"
             >
               {{ exercise.name }}
@@ -61,7 +61,7 @@ import { parseDate } from "@/utils/FormattedDate";
 import formattedUrlSlug from "@/utils/FormattedUrlSlug";
 import { getLocalISODate } from "@/utils/GetLocalDate";
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 const progressStore = useProgressStore();
 
@@ -72,6 +72,13 @@ const newExerciseName = ref("");
 const showModal = ref(false);
 
 const showAutocomplete = ref(false);
+const filteredExercises = computed(() => {
+  if (!newExerciseName.value.trim()) return myExercises.value;
+
+  return myExercises.value.filter((exercise) =>
+    exercise.name.toLowerCase().includes(newExerciseName.value.toLowerCase())
+  );
+});
 
 onMounted(() => {
   progressStore.findRoutine();
