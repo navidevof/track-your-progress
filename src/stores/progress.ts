@@ -97,7 +97,13 @@ export const useProgressStore = defineStore(
           .filter((routine) => routine.date !== selectedDate.value)
           .flatMap((routine) =>
             routine.exercises
-              .filter((exercise) => exercise.id === exerciseId)
+              .filter(
+                (exercise) =>
+                  exercise.id === exerciseId &&
+                  exercise.series.some(
+                    (series) => series.reps > 0 && series.weight > 0
+                  )
+              )
               .map((exercise) => ({ date: routine.date, exercise }))
           )
           .sort(

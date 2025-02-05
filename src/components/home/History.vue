@@ -75,7 +75,7 @@
             class="text-center text-sm text-pretty"
             v-show="!progress[localSelectedDay].length"
           >
-            Parece que no haz realizado ninguna rutina este dia.
+            Pasó el dia y no hiciste ninguna rutina 🤦‍♂️
           </span>
         </div>
       </template>
