@@ -1,6 +1,7 @@
 import { initialProgress } from "@/constants/initialValues";
 import type { IMyExercise } from "@/interfaces/exercise";
-import type { IProgress, IRoutine, TDay } from "@/interfaces/progress";
+import type { IProgress, TDay } from "@/interfaces/progress";
+import type { IRoutine } from "@/interfaces/routine";
 import { parseDate } from "@/utils/FormattedDate";
 import { getLocalISODate } from "@/utils/GetLocalDate";
 import { defineStore } from "pinia";
@@ -14,7 +15,6 @@ export const useProgressStore = defineStore(
     const progress = ref<IProgress>(structuredClone(initialProgress));
     const routine = ref<IRoutine>();
     const lastRoutine = ref<IRoutine>();
-    const myExercises = ref<IMyExercise[]>([]);
 
     const findLastRoutineForDay = (
       day: TDay,
@@ -131,7 +131,6 @@ export const useProgressStore = defineStore(
       routine,
       lastRoutine,
       isLastRoutineSame,
-      myExercises,
       findRoutine,
       findLastExerciseRecord,
     };

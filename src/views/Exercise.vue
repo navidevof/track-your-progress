@@ -1,6 +1,5 @@
 <template>
-  <MainContainer>
-    <ButtonBack />
+  <MainContainer showBackButton>
     <h1
       class="font-bold text-center text-xl md:text-2xl text-pretty mx-auto w-5/6"
     >
@@ -86,6 +85,7 @@
               type="number"
               class="w-full"
               :disabled="idx > 0 && isWeightChange"
+              @change="changeWeight"
             />
           </label>
           <label class="flex flex-col gap-y-1 w-full">
@@ -133,7 +133,6 @@
 import TopSet from "@/components/exercise/TopSet.vue";
 import IconEdit from "@/components/icons/IconEdit.vue";
 import IconX from "@/components/icons/IconX.vue";
-import ButtonBack from "@/components/ui/buttons/ButtonBack.vue";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary.vue";
 import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary.vue";
 import MainContainer from "@/components/ui/generals/MainContainer.vue";

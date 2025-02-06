@@ -1,19 +1,6 @@
 <template>
-  <ButtonPrimary
-    type="button"
-    class="ml-2 font-medium"
-    @click="showModal = true"
-  >
-    Historial
-  </ButtonPrimary>
-
-  <ModalContainer
-    className="max-w-3xl !w-5/6"
-    v-show="showModal"
-    @close="closeModal"
-  >
-    <div class="flex flex-col gap-y-4">
-      <h2 class="text-center font-semibold text-lg">Historial</h2>
+  <MainContainer title="Historial de ejercicios">
+    <SectionContainer>
       <template v-if="showSelectDayData">
         <button
           class="font-medium text-start flex items-center justify-start gap-x-1 w-full transition duration-200 hover:text-custom-gray-4"
@@ -75,7 +62,7 @@
             class="text-center text-sm text-pretty"
             v-show="!progress[localSelectedDay].length"
           >
-            Pasó el dia y no hiciste ninguna rutina 🤦‍♂️
+            Aún no has registrado ninguna rutina para este día.
           </span>
         </div>
       </template>
@@ -89,21 +76,21 @@
           {{ formattedDay(day) }}
         </ButtonSecondary>
       </div>
-    </div>
-  </ModalContainer>
+    </SectionContainer>
+  </MainContainer>
 </template>
 
 <script setup lang="ts">
+import MainContainer from "@/components/ui/generals/MainContainer.vue";
 import { ref } from "vue";
-import ButtonPrimary from "../ui/buttons/ButtonPrimary.vue";
-import ModalContainer from "../ui/generals/ModalContainer.vue";
-import ButtonSecondary from "../ui/buttons/ButtonSecondary.vue";
+import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary.vue";
 import type { TDay } from "@/interfaces/progress";
 import formattedDay from "@/utils/FormattedDay";
 import { useProgressStore } from "@/stores/progress";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
-import IconChevron from "../icons/IconChevron.vue";
+import IconChevron from "@/components/icons/IconChevron.vue";
+import SectionContainer from "@/components/ui/generals/SectionContainer.vue";
 
 const showModal = ref(false);
 const showSelectDayData = ref(false);
@@ -119,11 +106,6 @@ const selectDay = (day: number) => {
   showSelectDayData.value = true;
 };
 
-const closeModal = () => {
-  showSelectDayData.value = false;
-  showModal.value = false;
-};
-
 const goToExercise = (date: string, exerciseId: string) => {
   showModal.value = false;
   selectedDate.value = date;
@@ -135,7 +117,6 @@ const toggleRoutine = (routineDate: string) => {
   expandedRoutines.value[routineDate] = !expandedRoutines.value[routineDate];
 };
 
-// Función para verificar si un ejercicio está expandido
 const isExpanded = (routineDate: string): boolean => {
   return !!expandedRoutines.value[routineDate];
 };

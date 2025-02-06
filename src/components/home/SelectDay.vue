@@ -1,21 +1,21 @@
 <template>
-  <div class="flex w-full justify-around gap-x-2 items-center">
+  <div class="flex w-full max-w-sm mx-auto justify-around gap-x-2 items-center">
     <div
       class="flex flex-col gap-y-1 justify-center items-center"
       v-for="(_, day) in 7"
       :key="day"
     >
       <button
-        class="rounded-full size-9 border border-white"
-        :class="[selectedDay == day ? 'bg-white' : 'bg-custom-gray-1']"
+        class="rounded-full size-9 min-w-9 border border-white font-medium"
+        :class="[
+          selectedDay == day
+            ? 'bg-white text-custom-black-1'
+            : 'bg-custom-gray-1',
+        ]"
         @click="selectDay(day)"
-      ></button>
-      <span class="font-medium text-sm md:hidden">{{
-        formattedDay(day)[0]
-      }}</span>
-      <span class="font-medium text-sm md:block hidden">{{
-        formattedDay(day)
-      }}</span>
+      >
+        {{ formattedDay(day)[0] }}
+      </button>
     </div>
   </div>
 </template>

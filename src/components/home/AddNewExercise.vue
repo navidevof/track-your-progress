@@ -4,42 +4,63 @@
     type="button"
     class="mx-auto font-medium"
   >
-    Agregar {{ !routine?.exercises?.length ? "" : "nuevo" }} ejercicio
+    Agregar ejercicio
   </ButtonPrimary>
-  <ModalContainer
-    className="!overflow-visible"
-    v-show="showModal"
-    @close="showModal = false"
-  >
+  <ModalContainer v-show="showModal" @close="showModal = false">
     <div class="flex flex-col gap-y-4">
       <h2 class="text-center font-medium text-lg">Agregar nuevo ejercicio</h2>
-      <p class="text-sm text-center text-pretty">
-        Escribe el nombre del ejercicio y luego pulsa el botón de agregar.
+      <p class="text-sm text-pretty text-white/75">
+        Solo los campos marcados con * son obligatorios.
       </p>
       <form @submit.prevent="createExercises" class="flex flex-col gap-4">
-        <div class="w-full relative">
-          <input
-            type="search"
-            placeholder="Nombre del ejercicio"
-            v-model="newExerciseName"
-            required
-            @focus="showAutocomplete = true"
-            ref="inputField"
-            class="w-full"
-          />
-          <div
-            v-show="showAutocomplete && filteredExercises.length > 0"
-            class="absolute left-0 z-10 top-full mt-2 w-full flex flex-col divide-y divide-custom-gray-2 overflow-y-auto max-h-52 items-center gap-x-2 bg-custom-gray-1 rounded-lg px-4"
-            ref="autocompleteContainer"
-          >
-            <button
-              @mousedown.prevent="selectExercise(exercise.name)"
-              v-for="exercise in filteredExercises"
-              class="w-full text-start py-2"
-            >
-              {{ exercise.name }}
-            </button>
-          </div>
+        <div class="w-full relative flex flex-col gap-y-3">
+          <label class="flex flex-col gap-y-1">
+            <span class="text-sm">Nombre del ejercicio*</span>
+            <input
+              placeholder="Nombre del ejercicio"
+              v-model="newExercise.name"
+              required
+              class="w-full"
+            />
+          </label>
+          <label class="flex flex-col gap-y-1">
+            <span class="text-sm">Repeticiones</span>
+            <input
+              type="number"
+              min="1"
+              placeholder="Repeticiones"
+              v-model="newExercise.possibleReps"
+              class="w-full"
+            />
+          </label>
+          <label class="flex flex-col gap-y-1">
+            <span class="text-sm">Tiempo de ejecución</span>
+            <div class="flex w-full gap-x-1 items-center">
+              <input
+                placeholder="Tiempo de ejecución"
+                v-model="newExercise!.possibleExecutionTime!.value"
+                class="w-full"
+              />
+              <select v-model="newExercise!.possibleExecutionTime!.unit">
+                <option :value="TimeUnit.MINUTES">Min</option>
+                <option :value="TimeUnit.SECONDS">Seg</option>
+              </select>
+            </div>
+          </label>
+          <label class="flex flex-col gap-y-1">
+            <span class="text-sm">Tiempo de descanso</span>
+            <div class="flex w-full gap-x-1 items-center">
+              <input
+                placeholder="Tiempo de descanso"
+                v-model="newExercise!.possibleRestTime!.value"
+                class="w-full"
+              />
+              <select v-model="newExercise!.possibleRestTime!.unit">
+                <option :value="TimeUnit.MINUTES">Min</option>
+                <option :value="TimeUnit.SECONDS">Seg</option>
+              </select>
+            </div>
+          </label>
         </div>
         <ButtonPrimary type="submit" class="mx-auto font-medium">
           Agregar
@@ -50,100 +71,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from "vue";
+import { ref } from "vue";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary.vue";
 import ModalContainer from "@/components/ui/generals/ModalContainer.vue";
-import type { IExercise } from "@/interfaces/exercise";
-import type { IRoutine } from "@/interfaces/progress";
-import { useProgressStore } from "@/stores/progress";
-import { parseDate } from "@/utils/FormattedDate";
-import formattedUrlSlug from "@/utils/FormattedUrlSlug";
-import { getLocalISODate } from "@/utils/GetLocalDate";
+import { TimeUnit, type IMyExercise } from "@/interfaces/exercise";
 import { storeToRefs } from "pinia";
+import { useMyAccountStore } from "@/stores/myAccount";
+import { initialMyExercise } from "@/constants/initialValues";
+import formattedUrlSlug from "@/utils/FormattedUrlSlug";
+import { useUIStore } from "@/stores/ui";
 
-const progressStore = useProgressStore();
-const { routine, selectedDay, progress, selectedDate, myExercises } =
-  storeToRefs(progressStore);
+const uiStore = useUIStore();
+const myAccountStore = useMyAccountStore();
 
-const newExerciseName = ref("");
+const { myExercises } = storeToRefs(myAccountStore);
+
+const newExercise = ref<IMyExercise>(structuredClone(initialMyExercise));
 const showModal = ref(false);
-const showAutocomplete = ref(false);
-const inputField = ref<HTMLInputElement | null>(null);
-const autocompleteContainer = ref<HTMLDivElement | null>(null);
-
-// Filtrar ejercicios según el texto ingresado
-const filteredExercises = computed(() => {
-  if (!newExerciseName.value.trim()) return myExercises.value;
-  return myExercises.value.filter((exercise) =>
-    exercise.id.toLowerCase().includes(formattedUrlSlug(newExerciseName.value))
-  );
-});
-
-onMounted(() => {
-  progressStore.findRoutine();
-  document.addEventListener("mousedown", handleClickOutside);
-  document.addEventListener("touchstart", handleClickOutside);
-});
-
-onUnmounted(() => {
-  document.removeEventListener("mousedown", handleClickOutside);
-  document.removeEventListener("touchstart", handleClickOutside);
-});
-
-// Cerrar el autocompletado si se hace clic o toque fuera del contenedor
-const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-  const target = event.target as Node;
-
-  if (
-    autocompleteContainer.value &&
-    !autocompleteContainer.value.contains(target) &&
-    inputField.value &&
-    !inputField.value.contains(target)
-  ) {
-    showAutocomplete.value = false;
-  }
-};
-
-// Seleccionar un ejercicio del autocompletado
-const selectExercise = (name: string) => {
-  newExerciseName.value = name;
-  showAutocomplete.value = false; // Cerrar el autocompletado al seleccionar
-};
 
 // Crear un nuevo ejercicio
 const createExercises = () => {
-  if (!newExerciseName.value.trim()) return;
+  if (!newExercise.value.name.trim()) return;
 
-  const newExercise: IExercise = {
-    id: formattedUrlSlug(newExerciseName.value),
-    name: newExerciseName.value,
-    series: [],
-    createdAt: Date.now(),
-  };
+  newExercise.value.id = formattedUrlSlug(newExercise.value.name);
 
-  if (!routine.value && selectedDate.value) {
-    const parserSelectedDate = parseDate(selectedDate.value);
-    const newRoutine: IRoutine = {
-      date: getLocalISODate(parserSelectedDate),
-      exercises: [newExercise],
-    };
-    progress.value[selectedDay.value].unshift(newRoutine);
-    routine.value = newRoutine;
-    newExerciseName.value = "";
-    showModal.value = false;
+  const exerciseExists = myExercises.value.find(
+    (exercise) => exercise.id === newExercise.value.id
+  );
+
+  if (exerciseExists) {
+    uiStore.showAlert("warning", "El ejercicio ya existe");
     return;
   }
 
-  // Validar si el ejercicio no existe en la lista de ejercicios
-  const existExercise = myExercises.value.find(
-    (exercise) => exercise.id === newExercise.id
-  );
-  if (!existExercise) {
-    myExercises.value.push(newExercise);
-  }
-
-  routine.value?.exercises.push(newExercise);
-  newExerciseName.value = "";
+  myAccountStore.myExercises.push(newExercise.value);
+  newExercise.value = structuredClone(initialMyExercise);
   showModal.value = false;
 };
 </script>

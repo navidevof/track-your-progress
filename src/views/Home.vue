@@ -1,8 +1,5 @@
 <template>
-  <MainContainer>
-    <h1 class="text-xl font-bold text-center md:text-2xl">
-      Registra tu progreso
-    </h1>
+  <MainContainer title="Registra tu progreso">
     <Header />
     <SectionContainer v-show="routine?.exercises?.length">
       <div
@@ -25,16 +22,28 @@
           {{ exercise.name }}
         </ButtonSecondary>
         <button @click="deleteExercise(idx)">
-          <IconTrash class="size-5 min-w-4 text-custom-error/75" />
+          <IconTrash
+            class="size-5 min-w-4 transition hover:text-custom-error/75"
+          />
         </button>
       </div>
-    </SectionContainer>
-    <SectionContainer>
-      <p class="text-center text-sm" v-show="!routine?.exercises?.length">
-        Parece que no haz realizado ninguna rutina este dia. ¿Te gustaría
-        registrar tu progreso?
-      </p>
       <AddNewExercise />
+    </SectionContainer>
+    <SectionContainer v-show="!routine?.exercises?.length">
+      <div
+        class="rounded-lg bg-custom-black-3/50 drop-shadow p-4 flex flex-col gap-y-3 justify-center items-center"
+      >
+        <div class="bg-custom-gray-1 rounded-full p-4">
+          <IconCalendar class="size-8 min-w-8 text-white/75" />
+        </div>
+        <p class="text-center">
+          Parece que no has realizado ninguna rutina este día.
+        </p>
+        <span class="text-white/75 mb-3 text-sm">
+          ¿Te gustaría registrar tu progreso?
+        </span>
+      </div>
+      <ButtonPrimary class="mx-auto">Asignar rutina</ButtonPrimary>
     </SectionContainer>
   </MainContainer>
 </template>
@@ -42,7 +51,9 @@
 <script setup lang="ts">
 import AddNewExercise from "@/components/home/AddNewExercise.vue";
 import Header from "@/components/home/Header.vue";
+import IconCalendar from "@/components/icons/IconCalendar.vue";
 import IconTrash from "@/components/icons/IconTrash.vue";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary.vue";
 import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary.vue";
 import MainContainer from "@/components/ui/generals/MainContainer.vue";
 import SectionContainer from "@/components/ui/generals/SectionContainer.vue";

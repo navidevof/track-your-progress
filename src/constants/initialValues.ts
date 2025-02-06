@@ -1,4 +1,4 @@
-import type { ISerie } from "@/interfaces/exercise";
+import { TimeUnit, type IMyExercise, type ISerie } from "@/interfaces/exercise";
 import type { IProgress } from "@/interfaces/progress";
 
 const initialProgress: IProgress = {
@@ -18,4 +18,18 @@ const initialSeries: ISerie[] = Array.from({ length: 3 }, () => ({
   weightUnit: "kg",
 }));
 
-export { initialProgress, initialSeries };
+const initialMyExercise: IMyExercise = {
+  id: "",
+  name: "",
+  possibleReps: null,
+  possibleRestTime: {
+    value: null,
+    unit: TimeUnit.MINUTES,
+  },
+  possibleExecutionTime: {
+    value: null,
+    unit: TimeUnit.MINUTES,
+  },
+};
+
+export { initialProgress, initialSeries, initialMyExercise };
