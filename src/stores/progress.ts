@@ -47,11 +47,13 @@ export const useProgressStore = defineStore(
       );
 
       if (assignedRoutine) {
-        targetRoutine = {
-          date: targetISO,
-          id: assignedRoutine.id,
-          exercises: assignedRoutine.exercises,
-        };
+        targetRoutine = JSON.parse(
+          JSON.stringify({
+            date: targetISO,
+            id: assignedRoutine.id,
+            exercises: assignedRoutine.exercises,
+          })
+        ) as IRoutine;
 
         routinesForDay.unshift(targetRoutine);
         progress.value[dayOfWeek] = routinesForDay;

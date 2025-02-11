@@ -103,7 +103,7 @@ const filteredExercises = computed(() => {
 
 const assignExercise = (exercise: IMyExercise) => {
   const newExercise: IExercise = {
-    ...exercise,
+    ...JSON.parse(JSON.stringify(exercise)),
     series: [],
   };
   emit("exercise", newExercise);

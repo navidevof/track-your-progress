@@ -112,8 +112,8 @@ const assignRoutine = (routineId: string) => {
 
     if (!newRoutine || !routine.value) return;
 
-    routine.value.id = newRoutine.id;
-    routine.value.exercises = newRoutine.exercises;
+    routine.value.id = JSON.parse(JSON.stringify(newRoutine.id));
+    routine.value.exercises = JSON.parse(JSON.stringify(newRoutine.exercises));
   }
 
   assignedRoutines.value[selectedDay.value] = routineId;

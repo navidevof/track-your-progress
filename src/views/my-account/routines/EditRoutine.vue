@@ -99,7 +99,7 @@ const addExercise = (newExercise: IExercise) => {
     return;
   }
 
-  routine.value.exercises.push(newExercise);
+  routine.value.exercises.push(JSON.parse(JSON.stringify(newExercise)));
 };
 
 onMounted(() => {
