@@ -4,34 +4,9 @@
       class="font-bold text-center text-xl md:text-2xl text-pretty mx-auto w-5/6"
     >
       Ejercicio
-      <form
-        @submit.prevent="showEdit = false"
-        v-if="exercise?.name.trim() !== undefined"
-        class="w-full"
-      >
-        <input
-          type="text"
-          class="text-base inline w-5/6 mt-1"
-          v-model="exercise.name"
-          v-show="showEdit"
-          autofocus
-          required
-        />
-        <strong
-          v-show="!showEdit"
-          class="font-black text-pretty break-words w-5/6"
-          @dblclick="showEdit = true"
-        >
-          {{ exercise?.name }}
-        </strong>
-        <button
-          type="button"
-          @click="showEdit = !showEdit"
-          class="mt-1 ml-2 inline"
-        >
-          <IconEdit class="size-4 min-w-4" />
-        </button>
-      </form>
+      <strong class="font-black text-pretty break-words w-5/6 block mx-auto">
+        {{ exercise?.name }}
+      </strong>
     </h1>
     <SectionContainer class="items-end flex flex-col">
       <div class="relative" ref="dropdownRef">
@@ -85,7 +60,7 @@
               type="number"
               class="w-full"
               :disabled="idx > 0 && isWeightChange"
-              @change="changeWeight"
+              @input="changeWeight"
             />
           </label>
           <label class="flex flex-col gap-y-1 w-full">
@@ -131,7 +106,6 @@
 
 <script setup lang="ts">
 import TopSet from "@/components/exercise/TopSet.vue";
-import IconEdit from "@/components/icons/IconEdit.vue";
 import IconX from "@/components/icons/IconX.vue";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary.vue";
 import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary.vue";
@@ -149,7 +123,6 @@ const progressStore = useProgressStore();
 const { routine } = storeToRefs(progressStore);
 const exercise = ref<IExercise>();
 
-const showEdit = ref<boolean>(false);
 const isWeightChange = ref<boolean>(true);
 const isWeightUnitChange = ref<boolean>(true);
 const showAdjustWeight = ref<boolean>(false);

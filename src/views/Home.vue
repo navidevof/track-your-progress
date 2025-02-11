@@ -1,10 +1,11 @@
 <template>
   <MainContainer title="Registra tu progreso">
     <Header />
-    <SectionContainer v-show="routine?.exercises?.length">
+    <SectionContainer v-if="routine">
       <div
         class="flex items-center gap-x-3 relative"
         v-for="(exercise, idx) in routine?.exercises"
+        v-show="routine?.exercises?.length"
         :key="exercise.id"
       >
         <ButtonSecondary
@@ -27,49 +28,77 @@
           />
         </button>
       </div>
-      <AddNewExercise />
+      <CardEmpty v-if="!routine?.exercises.length">
+        <template #icon>
+          <IconBarbell class="size-8 min-w-8 text-white/75" />
+        </template>
+        <template #description>
+          Parece que esta rutina no tiene ejercicios.
+        </template>
+        <template #cta> ¿Te gustaría agregar uno? </template>
+      </CardEmpty>
+      <AssignExercise @exercise="(newExercise) => addExercise(newExercise)" />
     </SectionContainer>
-    <SectionContainer v-show="!routine?.exercises?.length">
-      <div
-        class="rounded-lg bg-custom-black-3/50 drop-shadow p-4 flex flex-col gap-y-3 justify-center items-center"
-      >
-        <div class="bg-custom-gray-1 rounded-full p-4">
+    <SectionContainer v-else>
+      <CardEmpty>
+        <template #icon>
           <IconCalendar class="size-8 min-w-8 text-white/75" />
-        </div>
-        <p class="text-center">
+        </template>
+        <template #description>
           Parece que no has realizado ninguna rutina este día.
-        </p>
-        <span class="text-white/75 mb-3 text-sm">
-          ¿Te gustaría registrar tu progreso?
-        </span>
-      </div>
-      <ButtonPrimary class="mx-auto">Asignar rutina</ButtonPrimary>
+        </template>
+        <template #cta> ¿Te gustaría asignar una? </template>
+      </CardEmpty>
+      <AssignRoutine />
     </SectionContainer>
   </MainContainer>
 </template>
 
 <script setup lang="ts">
-import AddNewExercise from "@/components/home/AddNewExercise.vue";
 import Header from "@/components/home/Header.vue";
+import IconBarbell from "@/components/icons/IconBarbell.vue";
 import IconCalendar from "@/components/icons/IconCalendar.vue";
 import IconTrash from "@/components/icons/IconTrash.vue";
-import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary.vue";
+import AssignExercise from "@/components/routine/AssignExercise.vue";
+import AssignRoutine from "@/components/routine/AssignRoutine.vue";
 import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary.vue";
+import CardEmpty from "@/components/ui/generals/CardEmpty.vue";
 import MainContainer from "@/components/ui/generals/MainContainer.vue";
 import SectionContainer from "@/components/ui/generals/SectionContainer.vue";
+import type { IExercise } from "@/interfaces/exercise";
+import { useMyAccountStore } from "@/stores/myAccount";
 import { useProgressStore } from "@/stores/progress";
+import { useUIStore } from "@/stores/ui";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const uiStore = useUIStore();
 const progressStore = useProgressStore();
+const myAccountStore = useMyAccountStore();
 
 const { routine } = storeToRefs(progressStore);
+const { myRoutines } = storeToRefs(myAccountStore);
 
 onMounted(() => {
   progressStore.findRoutine();
 });
+
+const addExercise = (newExercise: IExercise) => {
+  if (!routine.value || !myRoutines.value) return;
+  if (
+    routine.value.exercises.find((exercise) => exercise.id === newExercise.id)
+  ) {
+    uiStore.showAlert("warning", "Ya asignó este ejercicio a esta rutina");
+    return;
+  }
+
+  routine.value.exercises.push(newExercise);
+  myRoutines.value
+    .find((r) => r.id === routine.value?.id)
+    ?.exercises.push(newExercise);
+};
 
 const deleteExercise = (idx: number) => {
   routine.value?.exercises.splice(idx, 1);

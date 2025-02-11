@@ -15,7 +15,7 @@
       <form @submit.prevent="createExercises" class="flex flex-col gap-4">
         <div class="w-full relative flex flex-col gap-y-3">
           <label class="flex flex-col gap-y-1">
-            <span class="text-sm">Nombre del ejercicio*</span>
+            <span class="text-sm font-medium">Nombre del ejercicio*</span>
             <input
               placeholder="Nombre del ejercicio"
               v-model="newExercise.name"
@@ -24,7 +24,7 @@
             />
           </label>
           <label class="flex flex-col gap-y-1">
-            <span class="text-sm">Repeticiones</span>
+            <span class="text-sm font-medium">Repeticiones</span>
             <input
               type="number"
               min="1"
@@ -34,7 +34,7 @@
             />
           </label>
           <label class="flex flex-col gap-y-1">
-            <span class="text-sm">Tiempo de ejecución</span>
+            <span class="text-sm font-medium">Tiempo de ejecución</span>
             <div class="flex w-full gap-x-1 items-center">
               <input
                 placeholder="Tiempo de ejecución"
@@ -48,7 +48,7 @@
             </div>
           </label>
           <label class="flex flex-col gap-y-1">
-            <span class="text-sm">Tiempo de descanso</span>
+            <span class="text-sm font-medium">Tiempo de descanso</span>
             <div class="flex w-full gap-x-1 items-center">
               <input
                 placeholder="Tiempo de descanso"
@@ -88,12 +88,14 @@ const { myExercises } = storeToRefs(myAccountStore);
 
 const newExercise = ref<IMyExercise>(structuredClone(initialMyExercise));
 const showModal = ref(false);
+const emit = defineEmits(["exercise"]);
 
 // Crear un nuevo ejercicio
 const createExercises = () => {
   if (!newExercise.value.name.trim()) return;
 
   newExercise.value.id = formattedUrlSlug(newExercise.value.name);
+  newExercise.value.createdAt = Date.now();
 
   const exerciseExists = myExercises.value.find(
     (exercise) => exercise.id === newExercise.value.id
@@ -107,5 +109,6 @@ const createExercises = () => {
   myAccountStore.myExercises.push(newExercise.value);
   newExercise.value = structuredClone(initialMyExercise);
   showModal.value = false;
+  emit("exercise", { ...newExercise.value, series: [] });
 };
 </script>

@@ -19,6 +19,14 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: "/progreso",
+    name: "Progress",
+    component: () => import("@/views/Progress.vue"),
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
     path: "/mi-cuenta",
     name: "Account",
     component: () => import("@/views/my-account/_layout.vue"),
@@ -31,7 +39,23 @@ const routes: RouteRecordRaw[] = [
       {
         path: "/mi-cuenta/ejercicios",
         name: "MyExercises",
-        component: () => import("@/views/my-account/MyExercises.vue"),
+        component: () => import("@/views/my-account/exercises/MyExercises.vue"),
+      },
+      {
+        path: "/mi-cuenta/ejercicios/:exerciseId",
+        name: "EditExercise",
+        component: () =>
+          import("@/views/my-account/exercises/EditExercise.vue"),
+      },
+      {
+        path: "/mi-cuenta/rutinas",
+        name: "MyRoutines",
+        component: () => import("@/views/my-account/routines/MyRoutines.vue"),
+      },
+      {
+        path: "/mi-cuenta/rutinas/:routineId",
+        name: "EditRoutine",
+        component: () => import("@/views/my-account/routines/EditRoutine.vue"),
       },
     ],
     meta: {

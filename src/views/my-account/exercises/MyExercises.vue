@@ -1,20 +1,22 @@
 <template>
   <MainContainer title="Mis ejercicios" showBackButton>
     <SectionContainer>
-      <div
+      <aside
         class="flex items-center gap-x-3"
         v-for="(exercise, idx) in myExercises"
         :key="exercise.id"
       >
-        <ButtonSecondary class="w-full text-start">
-          <span>{{ exercise.name }}</span>
-        </ButtonSecondary>
+        <RouterLink class="w-full" :to="`/mi-cuenta/ejercicios/${exercise.id}`">
+          <ButtonSecondary class="w-full text-start">
+            <span>{{ exercise.name }}</span>
+          </ButtonSecondary>
+        </RouterLink>
         <button @click="deleteExercise(idx)">
           <IconTrash
             class="size-5 min-w-4 transition hover:text-custom-error/75"
           />
         </button>
-      </div>
+      </aside>
       <div
         class="rounded-lg bg-custom-black-3/50 drop-shadow p-4 flex flex-col gap-y-3 justify-center items-center"
         v-show="!myExercises.length"
@@ -35,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import AddNewExercise from "@/components/home/AddNewExercise.vue";
+import AddNewExercise from "@/components/exercise/AddNewExercise.vue";
 import IconBarbell from "@/components/icons/IconBarbell.vue";
 import IconTrash from "@/components/icons/IconTrash.vue";
 import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary.vue";

@@ -8,15 +8,48 @@
         @input="progressStore.findRoutine"
       />
     </div>
+    <div class="flex items-center w-full justify-between gap-x-3">
+      <div class="flex-1 line-clamp-1 w-full overflow-hidden">
+        <h2 class="font-medium">
+          Rutina:
+          <span class="text-white/75 font-normal">
+            {{
+              myRoutines.find((r) => r.id === routine?.id)?.name ||
+              "Sin rutina asignada"
+            }}
+          </span>
+        </h2>
+      </div>
+      <AssignRoutine
+        v-if="!isRoutineExecuted && assignedRoutines[selectedDay]"
+        buttonClass="!text-sm"
+      >
+        <template #button-text> Cambiar </template>
+      </AssignRoutine>
+    </div>
     <SelectDay />
   </header>
 </template>
 
 <script setup lang="ts">
-import { useProgressStore } from "@/stores/progress";
 import { storeToRefs } from "pinia";
+import { useProgressStore } from "@/stores/progress";
+import { useMyAccountStore } from "@/stores/myAccount";
 import SelectDay from "./SelectDay.vue";
+import AssignRoutine from "../routine/AssignRoutine.vue";
+import { computed } from "vue";
 
 const progressStore = useProgressStore();
-const { selectedDate } = storeToRefs(progressStore);
+const myAccountStore = useMyAccountStore();
+const { selectedDate, routine, assignedRoutines, selectedDay } =
+  storeToRefs(progressStore);
+const { myRoutines } = storeToRefs(myAccountStore);
+
+const isRoutineExecuted = computed(() => {
+  if (!routine.value) return false;
+
+  return routine.value.exercises
+    .flatMap((e) => e.series)
+    .some((s) => s.reps != 0 || s.weight != 0);
+});
 </script>

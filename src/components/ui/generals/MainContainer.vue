@@ -1,6 +1,6 @@
 <template>
   <main
-    class="container mx-auto w-5/6 max-w-xl py-8 flex flex-col gap-y-6 relative min-h-screen"
+    class="container mx-auto w-5/6 max-w-xl pt-8 pb-24 flex flex-col gap-y-6 relative min-h-screen"
   >
     <ButtonBack v-show="showBackButton" />
     <h1 v-if="title" class="text-xl font-bold text-start md:text-2xl">

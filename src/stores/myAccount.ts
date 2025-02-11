@@ -1,7 +1,8 @@
+import { ref } from "vue";
+import { defineStore } from "pinia";
+import LZString from "lz-string";
 import type { IMyExercise } from "@/interfaces/exercise";
 import type { IMyRoutine } from "@/interfaces/routine";
-import { defineStore } from "pinia";
-import { ref } from "vue";
 
 export const useMyAccountStore = defineStore(
   "myAccount",
@@ -14,5 +15,14 @@ export const useMyAccountStore = defineStore(
       myRoutines,
     };
   },
-  { persist: true }
+  {
+    persist: {
+      key: "myAccount",
+      storage: localStorage,
+      serializer: {
+        serialize: (state) => LZString.compress(JSON.stringify(state)),
+        deserialize: (value) => JSON.parse(LZString.decompress(value) || "{}"),
+      },
+    },
+  }
 );

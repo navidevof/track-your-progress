@@ -13,6 +13,7 @@ export enum TimeUnit {
 export interface IMyExercise {
   id: string;
   name: string;
+  createdAt: number;
   possibleReps?: number | null;
   possibleRestTime?: {
     value: number | null;
@@ -26,5 +27,4 @@ export interface IMyExercise {
 
 export interface IExercise extends IMyExercise {
   series: ISerie[];
-  createdAt: number;
 }
