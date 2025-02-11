@@ -1,6 +1,6 @@
 <template>
   <SectionContainer v-show="topSet">
-    <h2 class="font-semibold text-lg">Progreso Reciente:</h2>
+    <h2 class="font-semibold text-lg">Progreso reciente:</h2>
     <div class="justify-between flex items-center text-sm font-medium">
       <span>
         {{ topSet?.weight }} {{ topSet?.weightUnit }} x {{ topSet?.reps }} Reps

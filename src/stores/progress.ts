@@ -1,92 +1,63 @@
-import { initialProgress } from "@/constants/initialValues";
-import type { IMyExercise } from "@/interfaces/exercise";
-import type { IProgress, IRoutine, TDay } from "@/interfaces/progress";
+import { ref, watch } from "vue";
+import { defineStore, storeToRefs } from "pinia";
+import LZString from "lz-string";
+import {
+  initialAssignedRoutines,
+  initialProgress,
+} from "@/constants/initialValues";
+import type { IProgress, TDay } from "@/interfaces/progress";
+import type { IAssignedRoutines, IRoutine } from "@/interfaces/routine";
 import { parseDate } from "@/utils/FormattedDate";
 import { getLocalISODate } from "@/utils/GetLocalDate";
-import { defineStore } from "pinia";
-import { computed, ref, watch } from "vue";
+import { useMyAccountStore } from "./myAccount";
 
 export const useProgressStore = defineStore(
   "progress",
   () => {
+    const myAccountStore = useMyAccountStore();
+    const { myRoutines } = storeToRefs(myAccountStore);
+
     const selectedDate = ref(getLocalISODate(new Date()));
     const selectedDay = ref<TDay>(new Date().getDay() as TDay);
     const progress = ref<IProgress>(structuredClone(initialProgress));
+    const assignedRoutines = ref<IAssignedRoutines>(
+      structuredClone(initialAssignedRoutines)
+    );
     const routine = ref<IRoutine>();
-    const lastRoutine = ref<IRoutine>();
-    const myExercises = ref<IMyExercise[]>([]);
-
-    const findLastRoutineForDay = (
-      day: TDay,
-      date: Date,
-      excludeCurrent: boolean = false
-    ): IRoutine | undefined => {
-      const routines = (progress.value[day] || []).filter((r) =>
-        excludeCurrent ? new Date(r.date) < date : new Date(r.date) <= date
-      );
-
-      return routines.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      )[0];
-    };
-
-    const createNewRoutineFromLast = (
-      lastRoutine: IRoutine,
-      date: string
-    ): IRoutine => ({
-      date,
-      exercises: structuredClone(
-        lastRoutine.exercises.map((exercise) => ({
-          ...exercise,
-          series: exercise.series.map((series) => ({
-            id: Date.now() + Math.random(), // Generar un ID único
-            reps: 0,
-            weight: 0,
-            weightUnit: series.weightUnit,
-          })),
-        }))
-      ),
-    });
 
     // Función principal para encontrar o crear la rutina
     const findRoutine = () => {
       const targetDate = parseDate(selectedDate.value);
       const targetISO = getLocalISODate(targetDate);
-      const todayISO = getLocalISODate(new Date());
       const dayOfWeek = targetDate.getDay() as TDay;
       const routinesForDay = progress.value[dayOfWeek] || [];
 
       let targetRoutine = routinesForDay.find((r) => r.date === targetISO);
 
-      if (!targetRoutine) {
-        if (targetISO === todayISO) {
-          const lastRoutineForToday = findLastRoutineForDay(
-            dayOfWeek,
-            new Date(todayISO),
-            true
-          );
+      if (targetRoutine) {
+        routine.value = targetRoutine;
 
-          if (lastRoutineForToday) {
-            targetRoutine = createNewRoutineFromLast(
-              lastRoutineForToday,
-              todayISO
-            );
-            routinesForDay.unshift(targetRoutine);
-            progress.value[dayOfWeek] = routinesForDay;
-          }
-        } else {
-          targetRoutine = findLastRoutineForDay(dayOfWeek, targetDate);
-          if (targetRoutine) {
-            targetRoutine = createNewRoutineFromLast(targetRoutine, targetISO);
-            routinesForDay.unshift(targetRoutine);
-          }
+        return;
+      }
 
-          progress.value[dayOfWeek] = routinesForDay;
-        }
+      const routineId =
+        assignedRoutines.value && assignedRoutines.value[dayOfWeek];
+      const assignedRoutine = myRoutines.value.find(
+        (routine) => routine.id === routineId
+      );
+
+      if (assignedRoutine) {
+        targetRoutine = {
+          date: targetISO,
+          id: assignedRoutine.id,
+          exercises: assignedRoutine.exercises,
+        };
+
+        routinesForDay.unshift(targetRoutine);
+        progress.value[dayOfWeek] = routinesForDay;
       }
 
       routine.value = targetRoutine;
-      lastRoutine.value = findLastRoutineForDay(dayOfWeek, targetDate, true);
     };
 
     const findLastExerciseRecord = (exerciseId: string) => {
@@ -112,11 +83,6 @@ export const useProgressStore = defineStore(
       );
     };
 
-    // Computed
-    const isLastRoutineSame = computed(
-      () => routine.value?.date === lastRoutine.value?.date
-    );
-
     // Reacción a cambios en la fecha seleccionada
     watch(selectedDate, () => {
       const targetDate = parseDate(selectedDate.value);
@@ -127,16 +93,21 @@ export const useProgressStore = defineStore(
     return {
       selectedDate,
       selectedDay,
+      assignedRoutines,
       progress,
       routine,
-      lastRoutine,
-      isLastRoutineSame,
-      myExercises,
       findRoutine,
       findLastExerciseRecord,
     };
   },
   {
-    persist: true,
+    persist: {
+      key: "progress",
+      storage: localStorage,
+      serializer: {
+        serialize: (state) => LZString.compress(JSON.stringify(state)),
+        deserialize: (value) => JSON.parse(LZString.decompress(value) || "{}"),
+      },
+    },
   }
 );

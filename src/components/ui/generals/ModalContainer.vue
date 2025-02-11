@@ -1,9 +1,9 @@
 <template>
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-custom-black-2/50 backdrop-blur-md"
+    class="fixed top-0 left-0 inset-0 !z-50 flex items-center justify-center h-screen bg-custom-black-2/50 backdrop-blur-md"
   >
     <aside
-      :class="`${className} flex flex-col md:w-auto w-5/6 max-h-[90vh] bg-custom-black-2 overflow-y-auto p-4 rounded-lg border border-custom-gray-1`"
+      :class="`${className} flex flex-col w-5/6 max-w-lg max-h-[90vh] bg-custom-black-2 overflow-y-auto p-4 rounded-lg border border-custom-gray-1`"
     >
       <header class="flex justify-end">
         <button

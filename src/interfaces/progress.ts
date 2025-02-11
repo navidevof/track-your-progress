@@ -1,11 +1,6 @@
-import type { IExercise } from "./exercise";
+import type { IRoutine } from "./routine";
 
 export type TDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-
-export interface IRoutine {
-  date: string;
-  exercises: IExercise[];
-}
 
 export interface IProgress {
   0: IRoutine[];

@@ -1,7 +1,7 @@
 {
   "name": "track-your-progress",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.0",
+    "lz-string": "^1.5.0",
     "pinia": "^2.3.1",
     "pinia-plugin-persistedstate": "^4.2.0",
     "tailwindcss": "^4.0.0",
