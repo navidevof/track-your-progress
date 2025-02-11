@@ -109,6 +109,9 @@ const createExercises = () => {
   myAccountStore.myExercises.push(newExercise.value);
   newExercise.value = structuredClone(initialMyExercise);
   showModal.value = false;
-  emit("exercise", { ...newExercise.value, series: [] });
+  emit(
+    "exercise",
+    JSON.parse(JSON.stringify({ ...newExercise.value, series: [] }))
+  );
 };
 </script>
