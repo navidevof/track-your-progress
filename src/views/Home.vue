@@ -1,7 +1,7 @@
 <template>
   <MainContainer title="Registra tu progreso">
     <Header />
-    <SectionContainer v-if="routine">
+    <SectionContainer v-if="routine?.id">
       <div
         class="flex items-center gap-x-3 relative"
         v-for="(exercise, idx) in routine?.exercises"

@@ -112,11 +112,13 @@ const assignRoutine = (routineId: string) => {
 
     if (!newRoutine || !routine.value) return;
 
-    routine.value.id = JSON.parse(JSON.stringify(newRoutine.id));
     routine.value.exercises = JSON.parse(JSON.stringify(newRoutine.exercises));
   }
 
+  if (!routine.value) return;
+
   assignedRoutines.value[selectedDay.value] = routineId;
+  routine.value.id = routineId;
 
   showModal.value = false;
   progressStore.findRoutine();
