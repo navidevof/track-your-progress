@@ -138,7 +138,12 @@ const handleClickOutside = (event: MouseEvent) => {
 const addSerie = () => {
   if (!exercise.value) return;
 
-  exercise.value.series.push(structuredClone(initialSeries[0]));
+  const newSerie = structuredClone(initialSeries[0]);
+
+  if (isWeightChange.value) newSerie.weight = exercise.value.series[0].weight;
+  if (isWeightUnitChange.value)
+    newSerie.weightUnit = exercise.value.series[0].weightUnit;
+  exercise.value.series.push(newSerie);
 };
 
 const removeSerie = (index: number) => {
