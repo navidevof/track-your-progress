@@ -140,9 +140,12 @@ const addSerie = () => {
 
   const newSerie = structuredClone(initialSeries[0]);
 
-  if (isWeightChange.value) newSerie.weight = exercise.value.series[0].weight;
+  if (isWeightChange.value)
+    newSerie.weight =
+      exercise.value.series[0]?.weight || initialSeries[0].weight;
   if (isWeightUnitChange.value)
-    newSerie.weightUnit = exercise.value.series[0].weightUnit;
+    newSerie.weightUnit =
+      exercise.value.series[0]?.weightUnit || initialSeries[0].weightUnit;
   exercise.value.series.push(newSerie);
 };
 
