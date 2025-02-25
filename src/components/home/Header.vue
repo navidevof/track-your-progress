@@ -22,10 +22,17 @@
       </div>
       <AssignRoutine
         v-if="!isRoutineExecuted && assignedRoutines[selectedDay]"
-        buttonClass="!text-sm"
+        buttonClass="!text-xs"
       >
         <template #button-text> Cambiar </template>
       </AssignRoutine>
+      <ButtonSecondary
+        v-show="assignedRoutines[selectedDay]"
+        @click="unassignRoutine"
+        class="!border-custom-error !text-custom-error"
+      >
+        <IconTrash class="size-4" />
+      </ButtonSecondary>
     </div>
     <SelectDay />
   </header>
@@ -38,6 +45,8 @@ import { useMyAccountStore } from "@/stores/myAccount";
 import SelectDay from "./SelectDay.vue";
 import AssignRoutine from "../routine/AssignRoutine.vue";
 import { computed } from "vue";
+import ButtonSecondary from "../ui/buttons/ButtonSecondary.vue";
+import IconTrash from "../icons/IconTrash.vue";
 
 const progressStore = useProgressStore();
 const myAccountStore = useMyAccountStore();
@@ -52,4 +61,11 @@ const isRoutineExecuted = computed(() => {
     .flatMap((e) => e.series)
     .some((s) => s.reps != 0 || s.weight != 0);
 });
+
+const unassignRoutine = () => {
+  assignedRoutines.value[selectedDay.value] = "";
+  if (!routine.value) return;
+
+  routine.value.id = "";
+};
 </script>
