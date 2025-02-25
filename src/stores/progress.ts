@@ -42,8 +42,10 @@ export const useProgressStore = defineStore(
 
       const routineId =
         assignedRoutines.value && assignedRoutines.value[dayOfWeek];
-      const assignedRoutine = myRoutines.value.find(
-        (routine) => routine.id === routineId
+      const assignedRoutine = JSON.parse(
+        JSON.stringify(
+          myRoutines.value.find((routine) => routine.id === routineId)
+        )
       );
 
       if (assignedRoutine) {
