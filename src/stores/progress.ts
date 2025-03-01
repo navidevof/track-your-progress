@@ -10,6 +10,7 @@ import type { IAssignedRoutines, IRoutine } from "@/interfaces/routine";
 import { parseDate } from "@/utils/FormattedDate";
 import { getLocalISODate } from "@/utils/GetLocalDate";
 import { useMyAccountStore } from "./myAccount";
+import type { IExercise } from "@/interfaces/exercise";
 
 export const useProgressStore = defineStore(
   "progress",
@@ -68,8 +69,8 @@ export const useProgressStore = defineStore(
 
         if (!myRoutine) return;
 
-        targetRoutine.exercises = targetRoutine.exercises
-          .map((targetExercise) => {
+        targetRoutine.exercises = targetRoutine.exercises.map(
+          (targetExercise) => {
             const matchingExercise = myRoutine.exercises.find(
               (e) => e.id === targetExercise.id
             );
@@ -79,12 +80,11 @@ export const useProgressStore = defineStore(
                 series: matchingExercise.series,
               };
             }
-            return null;
-          })
-          .filter((e) => e !== null);
+            return targetExercise; // Instead of null, return the original exercise
+          }
+        ) as IExercise[]; // Add type assertion here
 
         routine.value = targetRoutine;
-
         return;
       }
 
