@@ -11,8 +11,9 @@
           selectedDay == day
             ? 'bg-white text-custom-black-1'
             : 'bg-custom-gray-1',
+          isSelectedDateInvalid(day),
         ]"
-        @click="selectDay(day)"
+        @click="isSelectedDateInvalid(day) == '' && selectDay(day)"
       >
         {{ formattedDay(day)[0] }}
       </button>
@@ -61,6 +62,24 @@ const selectDay = (dayIndex: number) => {
   const targetDate = getDateForDay(dayIndex);
   selectedDate.value = targetDate;
   selectedDay.value = dayIndex as TDay;
+};
+
+const isSelectedDateInvalid = (day: any) => {
+  // Convertir ambas fechas a la zona horaria local y normalizar a medianoche
+  const newSelectedDate = new Date(selectedDate.value + "T00:00:00");
+  const todayDate = new Date();
+  todayDate.setHours(0, 0, 0, 0);
+
+  // Obtener timestamps considerando el offset de la zona horaria
+  const todayEpoch =
+    todayDate.getTime() - todayDate.getTimezoneOffset() * 60000;
+  const selectedEpoch =
+    newSelectedDate.getTime() - newSelectedDate.getTimezoneOffset() * 60000;
+
+  if (todayDate.getDay() < day || selectedEpoch > todayEpoch)
+    return "!opacity-45 !cursor-not-allowed";
+
+  return "";
 };
 
 watch(selectedDate, (newDate) => {

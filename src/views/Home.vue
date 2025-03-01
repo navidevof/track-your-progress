@@ -1,7 +1,7 @@
 <template>
   <MainContainer title="Registra tu progreso">
     <Header />
-    <SectionContainer v-if="routine?.id">
+    <SectionContainer v-if="routine?.id && !selectedDateIsInvalid">
       <div
         class="flex items-center gap-x-3 relative"
         v-for="(exercise, idx) in routine?.exercises"
@@ -39,7 +39,7 @@
       </CardEmpty>
       <AssignExercise @exercise="(newExercise) => addExercise(newExercise)" />
     </SectionContainer>
-    <SectionContainer v-else>
+    <SectionContainer v-if="!routine?.id">
       <CardEmpty>
         <template #icon>
           <IconCalendar class="size-8 min-w-8 text-white/75" />
@@ -51,6 +51,23 @@
       </CardEmpty>
       <AssignRoutine />
     </SectionContainer>
+    <SectionContainer v-show="selectedDateIsInvalid">
+      <CardEmpty>
+        <template #icon>
+          <IconExclamation class="size-8 min-w-8 text-white/75" />
+        </template>
+        <template #description>
+          Parece que la fecha seleccionada no se encuentra disponible.
+        </template>
+        <template #cta>¿Te gustaría ir a la fecha actual? </template>
+      </CardEmpty>
+      <ButtonPrimary
+        class="mx-auto"
+        @click="progressStore.selectedDate = getLocalISODate(new Date())"
+      >
+        Ir a la fecha actual
+      </ButtonPrimary>
+    </SectionContainer>
   </MainContainer>
 </template>
 
@@ -58,9 +75,11 @@
 import Header from "@/components/home/Header.vue";
 import IconBarbell from "@/components/icons/IconBarbell.vue";
 import IconCalendar from "@/components/icons/IconCalendar.vue";
+import IconExclamation from "@/components/icons/IconExclamation.vue";
 import IconTrash from "@/components/icons/IconTrash.vue";
 import AssignExercise from "@/components/routine/AssignExercise.vue";
 import AssignRoutine from "@/components/routine/AssignRoutine.vue";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary.vue";
 import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary.vue";
 import CardEmpty from "@/components/ui/generals/CardEmpty.vue";
 import MainContainer from "@/components/ui/generals/MainContainer.vue";
@@ -72,13 +91,14 @@ import { useUIStore } from "@/stores/ui";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { getLocalISODate } from "@/utils/GetLocalDate";
 
 const router = useRouter();
 const uiStore = useUIStore();
 const progressStore = useProgressStore();
 const myAccountStore = useMyAccountStore();
 
-const { routine } = storeToRefs(progressStore);
+const { routine, selectedDateIsInvalid } = storeToRefs(progressStore);
 const { myRoutines } = storeToRefs(myAccountStore);
 
 onMounted(() => {

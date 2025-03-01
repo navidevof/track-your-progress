@@ -6,6 +6,7 @@
         class="ml-1 text-white font-medium"
         v-model="selectedDate"
         @input="progressStore.findRoutine"
+        :max="maxDate"
       />
     </div>
     <div class="flex items-center w-full justify-between gap-x-3">
@@ -68,4 +69,10 @@ const unassignRoutine = () => {
 
   routine.value.id = "";
 };
+
+const maxDate = computed(() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today.toISOString().split("T")[0];
+});
 </script>
