@@ -39,7 +39,7 @@
       </CardEmpty>
       <AssignExercise @exercise="(newExercise) => addExercise(newExercise)" />
     </SectionContainer>
-    <SectionContainer v-if="!routine?.id">
+    <SectionContainer v-if="!routine?.id && !selectedDateIsInvalid">
       <CardEmpty>
         <template #icon>
           <IconCalendar class="size-8 min-w-8 text-white/75" />

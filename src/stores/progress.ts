@@ -62,6 +62,27 @@ export const useProgressStore = defineStore(
       let targetRoutine = routinesForDay.find((r) => r.date === targetISO);
 
       if (targetRoutine) {
+        const myRoutine = myRoutines.value.find(
+          (routine) => routine.id === targetRoutine?.id
+        );
+
+        if (!myRoutine) return;
+
+        targetRoutine.exercises = targetRoutine.exercises
+          .map((targetExercise) => {
+            const matchingExercise = myRoutine.exercises.find(
+              (e) => e.id === targetExercise.id
+            );
+            if (matchingExercise) {
+              return {
+                ...targetExercise,
+                series: matchingExercise.series,
+              };
+            }
+            return null;
+          })
+          .filter((e) => e !== null);
+
         routine.value = targetRoutine;
 
         return;
