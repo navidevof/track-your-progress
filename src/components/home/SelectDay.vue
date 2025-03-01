@@ -76,7 +76,10 @@ const isSelectedDateInvalid = (day: any) => {
   const selectedEpoch =
     newSelectedDate.getTime() - newSelectedDate.getTimezoneOffset() * 60000;
 
-  if (todayDate.getDay() < day || selectedEpoch > todayEpoch)
+  if (
+    (selectedEpoch >= todayEpoch && todayDate.getDay() < day) ||
+    selectedEpoch > todayEpoch
+  )
     return "!opacity-45 !cursor-not-allowed";
 
   return "";
