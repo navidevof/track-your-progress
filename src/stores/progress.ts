@@ -1,4 +1,4 @@
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { defineStore, storeToRefs } from "pinia";
 import LZString from "lz-string";
 import {
@@ -24,6 +24,33 @@ export const useProgressStore = defineStore(
       structuredClone(initialAssignedRoutines)
     );
     const routine = ref<IRoutine>();
+    const selectedDateIsInvalid = computed(() => {
+      const newSelectedDate = new Date(selectedDate.value + "T00:00:00");
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+
+      // Obtener timestamps considerando el offset de la zona horaria
+      const todayEpoch =
+        todayDate.getTime() - todayDate.getTimezoneOffset() * 60000;
+      const selectedEpoch =
+        newSelectedDate.getTime() - newSelectedDate.getTimezoneOffset() * 60000;
+
+      return selectedEpoch > todayEpoch;
+    });
+
+    // Remove routines performed after current date (for the current day)
+    const removeRoutinesAfterToday = () => {
+      const dateLastRoutineByDay = progress.value[selectedDay.value];
+      if (!dateLastRoutineByDay) return;
+
+      const idx = dateLastRoutineByDay.findIndex(
+        (routine) => routine.date === selectedDate.value
+      );
+
+      if (idx !== -1) {
+        dateLastRoutineByDay.splice(idx + 1);
+      }
+    };
 
     // Función principal para encontrar o crear la rutina
     const findRoutine = () => {
@@ -93,6 +120,8 @@ export const useProgressStore = defineStore(
     watch(selectedDate, () => {
       const targetDate = parseDate(selectedDate.value);
       selectedDay.value = targetDate.getDay() as TDay;
+
+      removeRoutinesAfterToday();
       findRoutine();
     });
 
@@ -102,6 +131,7 @@ export const useProgressStore = defineStore(
       assignedRoutines,
       progress,
       routine,
+      selectedDateIsInvalid,
       findRoutine,
       findLastExerciseRecord,
     };
