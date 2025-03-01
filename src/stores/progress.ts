@@ -63,28 +63,31 @@ export const useProgressStore = defineStore(
       let targetRoutine = routinesForDay.find((r) => r.date === targetISO);
 
       if (targetRoutine) {
-        const myRoutine = myRoutines.value.find(
+        let selectedRoutine = myRoutines.value.find(
           (routine) => routine.id === targetRoutine?.id
         );
 
-        if (!myRoutine) return;
+        console.log({ selectedRoutine });
 
-        targetRoutine.exercises = targetRoutine.exercises.map(
-          (targetExercise) => {
-            const matchingExercise = myRoutine.exercises.find(
-              (e) => e.id === targetExercise.id
+        if (!selectedRoutine) return;
+
+        selectedRoutine.exercises = selectedRoutine.exercises.map(
+          (exercise) => {
+            const isExecuted = targetRoutine!.exercises.find(
+              (e) => e.id === exercise.id
             );
-            if (matchingExercise) {
-              return {
-                ...targetExercise,
-                series: matchingExercise.series,
-              };
+            if (isExecuted) {
+              exercise.series = isExecuted.series;
             }
-            return targetExercise; // Instead of null, return the original exercise
+            return exercise;
           }
-        ) as IExercise[]; // Add type assertion here
+        );
 
-        routine.value = targetRoutine;
+        routine.value = {
+          id: targetRoutine.id,
+          date: targetRoutine.date,
+          exercises: selectedRoutine.exercises,
+        };
         return;
       }
 
