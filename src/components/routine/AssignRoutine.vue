@@ -88,7 +88,8 @@ defineProps<Props>();
 const progressStore = useProgressStore();
 const myAccountStore = useMyAccountStore();
 
-const { assignedRoutines, selectedDay, routine } = storeToRefs(progressStore);
+const { assignedRoutines, selectedDay, routine, selectedDate } =
+  storeToRefs(progressStore);
 const { myRoutines } = storeToRefs(myAccountStore);
 
 const showModal = ref(false);
@@ -105,20 +106,24 @@ const filteredRoutines = computed(() => {
 });
 
 const assignRoutine = (routineId: string) => {
-  if (assignedRoutines.value[selectedDay.value]) {
-    const newRoutine = myRoutines.value.find(
-      (routine) => routine.id === routineId
-    );
+  const newRoutine = myRoutines.value.find(
+    (routine) => routine.id === routineId
+  );
 
-    if (!newRoutine || !routine.value) return;
+  if (!newRoutine) return;
 
-    routine.value.exercises = JSON.parse(JSON.stringify(newRoutine.exercises));
-  }
+  if (!assignedRoutines.value[selectedDay.value])
+    routine.value = {
+      date: selectedDate.value,
+      exercises: JSON.parse(JSON.stringify(newRoutine.exercises)),
+      id: routineId,
+    };
 
   if (!routine.value) return;
 
   assignedRoutines.value[selectedDay.value] = routineId;
   routine.value.id = routineId;
+  routine.value.exercises = JSON.parse(JSON.stringify(newRoutine.exercises));
 
   showModal.value = false;
   progressStore.findRoutine();
