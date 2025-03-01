@@ -10,7 +10,6 @@ import type { IAssignedRoutines, IRoutine } from "@/interfaces/routine";
 import { parseDate } from "@/utils/FormattedDate";
 import { getLocalISODate } from "@/utils/GetLocalDate";
 import { useMyAccountStore } from "./myAccount";
-import type { IExercise } from "@/interfaces/exercise";
 
 export const useProgressStore = defineStore(
   "progress",
