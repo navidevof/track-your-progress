@@ -76,11 +76,22 @@ const isSelectedDateInvalid = (day: any) => {
   const selectedEpoch =
     newSelectedDate.getTime() - newSelectedDate.getTimezoneOffset() * 60000;
 
-  if (
-    (selectedEpoch >= todayEpoch && todayDate.getDay() < day) ||
-    selectedEpoch > todayEpoch
-  )
+  const currentDay = todayDate.getDay();
+
+  const startOfSelectedWeek = new Date(newSelectedDate);
+  startOfSelectedWeek.setDate(
+    newSelectedDate.getDate() - newSelectedDate.getDay()
+  );
+
+  const startOfCurrentWeek = new Date(todayDate);
+  startOfCurrentWeek.setDate(todayDate.getDate() - todayDate.getDay());
+
+  const isCurrentWeek =
+    startOfSelectedWeek.getTime() === startOfCurrentWeek.getTime();
+
+  if (selectedEpoch > todayEpoch || (isCurrentWeek && day > currentDay)) {
     return "!opacity-45 !cursor-not-allowed";
+  }
 
   return "";
 };
